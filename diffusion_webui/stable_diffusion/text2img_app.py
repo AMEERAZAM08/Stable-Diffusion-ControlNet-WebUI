@@ -4,10 +4,13 @@ from diffusers import DDIMScheduler, StableDiffusionPipeline
 
 stable_model_list = [
     "runwayml/stable-diffusion-v1-5",
-    "stabilityai/stable-diffusion-2",
-    "stabilityai/stable-diffusion-2-base",
     "stabilityai/stable-diffusion-2-1",
-    "stabilityai/stable-diffusion-2-1-base",
+    "sd-dreambooth-library/disco-diffusion-style",
+    "prompthero/openjourney-v2",
+    "andite/anything-v4.0",
+    "Lykon/DreamShaper",
+    "nitrosocke/Nitro-Diffusion",
+    "dreamlike-art/dreamlike-diffusion-1.0",
 ]
 
 stable_prompt_list = ["a photo of a man.", "a photo of a girl."]
@@ -94,7 +97,7 @@ def stable_diffusion_text2img_app():
                         maximum=1280,
                         step=32,
                         value=768,
-                        label="Image Height",
+                        label="Image Width",
                     )
 
                 text2image_predict = gr.Button(value="Generator")
@@ -102,6 +105,32 @@ def stable_diffusion_text2img_app():
             with gr.Column():
                 output_image = gr.Image(label="Output")
 
+        gr.Examples(
+            examples=[
+                [
+                    stable_model_list[0],
+                    stable_prompt_list[0],
+                    stable_negative_prompt_list[0],
+                    7.5,
+                    50,
+                    512,
+                    768,
+                ]
+            ],
+            inputs=[
+                text2image_model_path,
+                text2image_prompt,
+                text2image_negative_prompt,
+                text2image_guidance_scale,
+                text2image_num_inference_step,
+                text2image_height,
+                text2image_width,
+            ],
+            outputs=[output_image],
+            cache_examples=False,
+            fn=stable_diffusion_text2img,
+            label="Text2Image Example",
+        )
         text2image_predict.click(
             fn=stable_diffusion_text2img,
             inputs=[

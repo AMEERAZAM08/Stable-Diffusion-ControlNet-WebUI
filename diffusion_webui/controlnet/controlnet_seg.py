@@ -11,15 +11,15 @@ from transformers import AutoImageProcessor, UperNetForSemanticSegmentation
 
 stable_model_list = [
     "runwayml/stable-diffusion-v1-5",
-    "stabilityai/stable-diffusion-2",
-    "stabilityai/stable-diffusion-2-base",
-    "stabilityai/stable-diffusion-2-1",
-    "stabilityai/stable-diffusion-2-1-base",
 ]
 
 stable_prompt_list = ["a photo of a man.", "a photo of a girl."]
 
 stable_negative_prompt_list = ["bad, ugly", "deformed"]
+
+data_list = [
+    "data/test.png",
+]
 
 
 def ade_palette():
@@ -205,7 +205,7 @@ def controlnet_mlsd(image_path: str):
     color_seg = color_seg.astype(np.uint8)
     image = Image.fromarray(color_seg)
     controlnet = ControlNetModel.from_pretrained(
-        "fusing/stable-diffusion-v1-5-controlnet-seg", torch_dtype=torch.float16
+        "lllyasviel/sd-controlnet-seg", torch_dtype=torch.float16
     )
 
     return controlnet, image
@@ -289,6 +289,31 @@ def stable_diffusion_controlnet_seg_app():
 
             with gr.Column():
                 output_image = gr.Image(label="Output")
+
+        gr.Examples(
+            fn=stable_diffusion_controlnet_seg,
+            examples=[
+                [
+                    data_list[0],
+                    stable_model_list[0],
+                    stable_prompt_list[0],
+                    stable_negative_prompt_list[0],
+                    7.5,
+                    50,
+                ],
+            ],
+            inputs=[
+                controlnet_seg_image_file,
+                controlnet_seg_model_id,
+                controlnet_seg_prompt,
+                controlnet_seg_negative_prompt,
+                controlnet_seg_guidance_scale,
+                controlnet_seg_num_inference_step,
+            ],
+            outputs=[output_image],
+            cache_examples=False,
+            label="ControlNet Segmentation Example",
+        )
 
         controlnet_seg_predict.click(
             fn=stable_diffusion_controlnet_seg,

@@ -1,16 +1,6 @@
 import gradio as gr
-import imageio
 import torch
 from diffusers import DDIMScheduler, DiffusionPipeline
-from PIL import Image
-
-stable_model_list = [
-    "runwayml/stable-diffusion-v1-5",
-    "stabilityai/stable-diffusion-2",
-    "stabilityai/stable-diffusion-2-base",
-    "stabilityai/stable-diffusion-2-1",
-    "stabilityai/stable-diffusion-2-1-base",
-]
 
 stable_inpiant_model_list = [
     "stabilityai/stable-diffusion-2-inpainting",
@@ -18,7 +8,6 @@ stable_inpiant_model_list = [
 ]
 
 stable_prompt_list = ["a photo of a man.", "a photo of a girl."]
-
 stable_negative_prompt_list = ["bad, ugly", "deformed"]
 
 
@@ -39,8 +28,6 @@ def stable_diffusion_inpaint(
         torch_dtype=torch.float16,
     )
     pipe.to("cuda")
-    pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
-    pipe.enable_xformers_memory_efficient_attention()
 
     output = pipe(
         prompt=prompt,
@@ -64,7 +51,7 @@ def stable_diffusion_inpaint_app():
                     elem_id="image_upload",
                     type="pil",
                     label="Upload",
-                ).style(height=400)
+                )
 
                 inpaint_model_id = gr.Dropdown(
                     choices=stable_inpiant_model_list,
@@ -102,7 +89,7 @@ def stable_diffusion_inpaint_app():
                 inpaint_predict = gr.Button(value="Generator")
 
             with gr.Column():
-                output_image = gr.Gallery(label="Outputs")
+                output_image = gr.Image(label="Outputs")
 
         inpaint_predict.click(
             fn=stable_diffusion_inpaint,

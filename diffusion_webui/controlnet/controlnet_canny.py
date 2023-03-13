@@ -11,10 +11,12 @@ from PIL import Image
 
 stable_model_list = [
     "runwayml/stable-diffusion-v1-5",
-    "stabilityai/stable-diffusion-2",
-    "stabilityai/stable-diffusion-2-base",
     "stabilityai/stable-diffusion-2-1",
-    "stabilityai/stable-diffusion-2-1-base",
+]
+
+controlnet_canny_model_list = [
+    "lllyasviel/sd-controlnet-canny",
+    "thibaud/controlnet-sd21-canny-diffusers",
 ]
 
 
@@ -22,9 +24,14 @@ stable_prompt_list = ["a photo of a man.", "a photo of a girl."]
 
 stable_negative_prompt_list = ["bad, ugly", "deformed"]
 
+data_list = [
+    "data/test.png",
+]
+
 
 def controlnet_canny(
     image_path: str,
+    controlnet_model_path: str,
 ):
     image = Image.open(image_path)
     image = np.array(image)
@@ -35,24 +42,27 @@ def controlnet_canny(
     image = Image.fromarray(image)
 
     controlnet = ControlNetModel.from_pretrained(
-        "lllyasviel/sd-controlnet-canny", torch_dtype=torch.float16
+        controlnet_model_path, torch_dtype=torch.float16
     )
     return controlnet, image
 
 
 def stable_diffusion_controlnet_canny(
     image_path: str,
-    model_path: str,
+    stable_model_path: str,
+    controlnet_model_path: str,
     prompt: str,
     negative_prompt: str,
     guidance_scale: int,
     num_inference_step: int,
 ):
 
-    controlnet, image = controlnet_canny(image_path)
+    controlnet, image = controlnet_canny(
+        image_path=image_path, controlnet_model_path=controlnet_model_path
+    )
 
     pipe = StableDiffusionControlNetPipeline.from_pretrained(
-        pretrained_model_name_or_path=model_path,
+        pretrained_model_name_or_path=stable_model_path,
         controlnet=controlnet,
         safety_checker=None,
         torch_dtype=torch.float16,
@@ -80,10 +90,16 @@ def stable_diffusion_controlnet_canny_app():
                     type="filepath", label="Image"
                 )
 
-                controlnet_canny_model_id = gr.Dropdown(
+                controlnet_canny_stable_model_id = gr.Dropdown(
                     choices=stable_model_list,
                     value=stable_model_list[0],
                     label="Stable Model Id",
+                )
+
+                controlnet_canny_model_id = gr.Dropdown(
+                    choices=controlnet_canny_model_list,
+                    value=controlnet_canny_model_list[0],
+                    label="Controlnet Model Id",
                 )
 
                 controlnet_canny_prompt = gr.Textbox(
@@ -118,10 +134,38 @@ def stable_diffusion_controlnet_canny_app():
             with gr.Column():
                 output_image = gr.Image(label="Output")
 
+        gr.Examples(
+            fn=stable_diffusion_controlnet_canny,
+            examples=[
+                [
+                    data_list[0],
+                    stable_model_list[0],
+                    controlnet_canny_model_list[0],
+                    stable_prompt_list[0],
+                    stable_negative_prompt_list[0],
+                    7.5,
+                    50,
+                ]
+            ],
+            inputs=[
+                controlnet_canny_image_file,
+                controlnet_canny_stable_model_id,
+                controlnet_canny_model_id,
+                controlnet_canny_prompt,
+                controlnet_canny_negative_prompt,
+                controlnet_canny_guidance_scale,
+                controlnet_canny_num_inference_step,
+            ],
+            outputs=[output_image],
+            cache_examples=False,
+            label="Controlnet Canny Example",
+        )
+
         controlnet_canny_predict.click(
             fn=stable_diffusion_controlnet_canny,
             inputs=[
                 controlnet_canny_image_file,
+                controlnet_canny_stable_model_id,
                 controlnet_canny_model_id,
                 controlnet_canny_prompt,
                 controlnet_canny_negative_prompt,

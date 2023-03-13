@@ -5,25 +5,21 @@ from PIL import Image
 
 stable_model_list = [
     "runwayml/stable-diffusion-v1-5",
-    "stabilityai/stable-diffusion-2",
-    "stabilityai/stable-diffusion-2-base",
     "stabilityai/stable-diffusion-2-1",
-    "stabilityai/stable-diffusion-2-1-base",
-]
-
-stable_inpiant_model_list = [
-    "stabilityai/stable-diffusion-2-inpainting",
-    "runwayml/stable-diffusion-inpainting",
 ]
 
 stable_prompt_list = ["a photo of a man.", "a photo of a girl."]
 
 stable_negative_prompt_list = ["bad, ugly", "deformed"]
 
+data_list = [
+    "data/test.png",
+]
+
 
 def stable_diffusion_img2img(
-    model_path: str,
     image_path: str,
+    model_path: str,
     prompt: str,
     negative_prompt: str,
     guidance_scale: int,
@@ -95,6 +91,31 @@ def stable_diffusion_img2img_app():
 
             with gr.Column():
                 output_image = gr.Image(label="Output")
+
+        gr.Examples(
+            fn=stable_diffusion_img2img,
+            examples=[
+                [
+                    data_list[0],
+                    stable_model_list[0],
+                    stable_prompt_list[0],
+                    stable_negative_prompt_list[0],
+                    7.5,
+                    50,
+                ],
+            ],
+            inputs=[
+                image2image2_image_file,
+                image2image_model_path,
+                image2image_prompt,
+                image2image_negative_prompt,
+                image2image_guidance_scale,
+                image2image_num_inference_step,
+            ],
+            outputs=[output_image],
+            cache_examples=False,
+            label="Image-Image Generator",
+        )
 
         image2image_predict.click(
             fn=stable_diffusion_img2img,

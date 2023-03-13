@@ -10,15 +10,15 @@ from PIL import Image
 
 stable_model_list = [
     "runwayml/stable-diffusion-v1-5",
-    "stabilityai/stable-diffusion-2",
-    "stabilityai/stable-diffusion-2-base",
-    "stabilityai/stable-diffusion-2-1",
-    "stabilityai/stable-diffusion-2-1-base",
 ]
 
 stable_prompt_list = ["a photo of a man.", "a photo of a girl."]
 
 stable_negative_prompt_list = ["bad, ugly", "deformed"]
+
+data_list = [
+    "data/test.png",
+]
 
 
 def controlnet_mlsd(image_path: str):
@@ -28,7 +28,7 @@ def controlnet_mlsd(image_path: str):
     image = mlsd(image)
 
     controlnet = ControlNetModel.from_pretrained(
-        "fusing/stable-diffusion-v1-5-controlnet-mlsd",
+        "lllyasviel/sd-controlnet-mlsd",
         torch_dtype=torch.float16,
     )
 
@@ -113,6 +113,31 @@ def stable_diffusion_controlnet_mlsd_app():
 
             with gr.Column():
                 output_image = gr.Image(label="Output")
+
+        gr.Examples(
+            fn=stable_diffusion_controlnet_mlsd,
+            examples=[
+                [
+                    data_list[0],
+                    stable_model_list[0],
+                    stable_prompt_list[0],
+                    stable_negative_prompt_list[0],
+                    7.5,
+                    50,
+                ]
+            ],
+            inputs=[
+                controlnet_mlsd_image_file,
+                controlnet_mlsd_model_id,
+                controlnet_mlsd_prompt,
+                controlnet_mlsd_negative_prompt,
+                controlnet_mlsd_guidance_scale,
+                controlnet_mlsd_num_inference_step,
+            ],
+            outputs=[output_image],
+            label="ControlNet-MLSD Example",
+            cache_examples=False,
+        )
 
         controlnet_mlsd_predict.click(
             fn=stable_diffusion_controlnet_mlsd,
