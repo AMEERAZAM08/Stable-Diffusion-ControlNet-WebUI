@@ -11,6 +11,7 @@ from diffusion_webui.helpers import (
     stable_diffusion_controlnet_seg_app,
     stable_diffusion_img2img_app,
     stable_diffusion_inpaint_app,
+    stable_diffusion_inpiant_controlnet_canny_app,
     stable_diffusion_text2img_app,
 )
 
@@ -56,7 +57,11 @@ with app:
                 with gr.Tab("Scribble"):
                     stable_diffusion_controlnet_scribble_app()
 
+            with gr.Tab("ControlNet Inpaint"):
+                with gr.Tab("Inpaint Canny"):
+                    stable_diffusion_inpiant_controlnet_canny_app()
+
             with gr.Tab("Keras Diffusion"):
                 keras_diffusion_app = keras_stable_diffusion_app()
 
-app.launch(debug=True)
+app.launch(debug=False)
